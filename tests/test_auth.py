@@ -143,6 +143,26 @@ def test_nothing_resolvable_raises_setup_token(monkeypatch):
     assert "setup-token" in str(excinfo.value)
 
 
+def test_expired_creds_no_refresh_no_env_reports_expired(monkeypatch):
+    """The real-world failure mode: a stale keychain token, failed refresh, no
+    env fallback. The error must say *expired* (not the misleading 'no token
+    found') and point at `claude setup-token`."""
+    creds = {"accessToken": "old", "refreshToken": "r", "expiresAt": 1}
+    _install_adapter_stub(
+        monkeypatch,
+        read_claude_code_credentials=creds,
+        is_claude_code_token_valid=False,  # expired
+        _refresh_oauth_token=None,         # refresh failed
+        resolve_anthropic_token=None,      # no env fallback
+    )
+    tp = TokenProvider()
+    with pytest.raises(TokenError) as excinfo:
+        tp.get_token()
+    msg = str(excinfo.value).lower()
+    assert "expired" in msg
+    assert "setup-token" in msg
+
+
 def test_caching_avoids_second_credential_read(monkeypatch):
     creds = {"accessToken": OAUTH_TOKEN, "refreshToken": "r", "expiresAt": FAR_FUTURE_MS}
     calls = _install_adapter_stub(

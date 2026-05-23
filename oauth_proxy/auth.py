@@ -66,11 +66,13 @@ class TokenProvider:
         candidate_expires_at_ms: Optional[int] = None
 
         creds = adapter.read_claude_code_credentials()
+        had_expired_creds = False
         if creds and adapter.is_claude_code_token_valid(creds):
             candidate = creds.get("accessToken")
             candidate_expires_at_ms = creds.get("expiresAt") or None
         elif creds:
             # Present but expired/invalid — try a refresh (writes back to disk).
+            had_expired_creds = True
             candidate = adapter._refresh_oauth_token(creds)
             # A refresh rotates the token; we don't know the new expiry here,
             # so leave it unknown and let the next call re-validate.
@@ -80,6 +82,17 @@ class TokenProvider:
             candidate = adapter.resolve_anthropic_token()
 
         if not candidate:
+            if had_expired_creds:
+                # Distinguish the common case (Claude Code IS installed, but its
+                # persisted token expired and the stored refresh token is stale)
+                # from "no credentials at all" — the generic message misled here.
+                raise TokenError(
+                    "Found a Claude Code OAuth token in the credential store, but it "
+                    "is expired and automatic refresh failed (the stored refresh "
+                    "token is likely stale). Mint a fresh one with `claude "
+                    "setup-token` and set CLAUDE_CODE_OAUTH_TOKEN, or re-login with "
+                    "the `claude` CLI."
+                )
             raise TokenError(
                 "No Claude Code OAuth subscription token found. Log in with the "
                 "`claude` CLI and run `claude setup-token`, or set "
