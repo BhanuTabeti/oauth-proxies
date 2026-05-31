@@ -74,7 +74,7 @@ when the package is imported (so tests never pick up a developer's `.env`).
 | `PROXY_HOST` | `127.0.0.1` | Bind host |
 | `PROXY_PORT` | `8787` | Bind port |
 | `PROXY_API_KEY` | _(unset)_ | If set, clients must send `Authorization: Bearer <key>` |
-| `DEFAULT_MODEL` | `claude-opus-4-7` | Substituted when a client requests a non-Claude model (e.g. `gpt-4o`) |
+| `DEFAULT_MODEL` | `claude-opus-4-8` | Substituted when a client requests a non-Claude model (e.g. `gpt-4o`) |
 | `DEFAULT_REASONING_EFFORT` | `off` | `off`/`low`/`medium`/`high`/`xhigh`/`max` — extended-thinking effort |
 | `PROXY_INCLUDE_REASONING` | `false` | Surface Claude thinking as a non-standard `reasoning_content` field |
 | `PROXY_REQUEST_TIMEOUT` | `900` | Upstream read timeout (seconds) |

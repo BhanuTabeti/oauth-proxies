@@ -56,6 +56,7 @@ class ChatCompletionRequest(_Lenient):
 # subscription path only reaches native Anthropic models. IDs match what the
 # Anthropic Messages API accepts.
 KNOWN_MODELS: List[str] = [
+    "claude-opus-4-8",
     "claude-opus-4-7",
     "claude-opus-4-6",
     "claude-sonnet-4-6",
