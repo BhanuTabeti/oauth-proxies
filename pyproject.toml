@@ -5,12 +5,12 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "oauth-proxy"
 version = "0.1.0"
-description = "Local OpenAI-compatible API server that forwards to Claude using your Claude subscription's Agent SDK credit."
+description = "Local OpenAI-compatible proxy for your Claude, ChatGPT (Codex), and Grok subscriptions via OAuth — no API keys."
 readme = "README.md"
 requires-python = ">=3.10"
 license = {file = "LICENSE"}
 authors = [{name = "Bhanu Tabeti", email = "bhanu.tabeti@gmail.com"}]
-keywords = ["claude", "anthropic", "openai-compatible", "proxy", "oauth", "agent-sdk"]
+keywords = ["claude", "anthropic", "chatgpt", "codex", "openai", "grok", "xai", "openai-compatible", "proxy", "oauth", "llm", "agent-sdk"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Environment :: Web Environment",
