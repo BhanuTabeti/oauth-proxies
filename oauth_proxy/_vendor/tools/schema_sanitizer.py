@@ -1,4 +1,4 @@
-"""Shim for hermes' ``tools.schema_sanitizer.strip_nullable_unions``.
+"""Shim providing ``tools.schema_sanitizer.strip_nullable_unions``.
 
 Anthropic's tool-schema validator rejects nullable unions such as
 ``anyOf: [{"type": "string"}, {"type": "null"}]`` that Pydantic/MCP commonly

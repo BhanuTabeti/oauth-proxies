@@ -6,10 +6,18 @@ This project includes the following third-party software.
 
 ## Hermes Agent — `anthropic_adapter.py`
 
-`oauth_proxy/_vendor/anthropic_adapter.py` is a verbatim copy of
+`oauth_proxy/_vendor/anthropic_adapter.py` is a **modified copy** derived from
 [`agent/anthropic_adapter.py`](https://github.com/NousResearch/hermes-agent/blob/main/agent/anthropic_adapter.py)
-from the [Hermes Agent](https://github.com/NousResearch/hermes-agent) project
-by Nous Research, used under the MIT License.
+in the [Hermes Agent](https://github.com/NousResearch/hermes-agent) project by
+Nous Research, used under the MIT License.
+
+Modifications in this distribution: hermes-specific identifiers (function,
+constant, module, env-var names) were renamed to neutral names; a small
+runtime sanitization block targeting upstream product names was removed
+(unused in this proxy's context); and provenance comments/docstrings were
+neutralized. No public behavior of the OAuth-subscription request path was
+changed. See `git log -- oauth_proxy/_vendor/anthropic_adapter.py` for the
+exact diff.
 
 Original license text reproduced below:
 
@@ -37,7 +45,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-The vendored file is unmodified. Local shim modules
-(`oauth_proxy/_vendor/hermes_constants.py`, `utils.py`,
+The local shim modules (`oauth_proxy/_vendor/_paths.py`, `utils.py`,
 `tools/schema_sanitizer.py`, `tools/lazy_deps.py`) are original to this
 project and licensed under the project's MIT License (see `LICENSE`).

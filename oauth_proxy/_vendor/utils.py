@@ -1,4 +1,4 @@
-"""Shims for the two hermes ``utils`` helpers the adapter imports at module top.
+"""Shims for the two ``utils`` helpers the vendored adapter imports at module top.
 
 For the OAuth-subscription path ``base_url`` is ``None`` (native
 ``api.anthropic.com``), so ``base_url_host_matches`` is effectively unused; we
@@ -24,7 +24,7 @@ def base_url_host_matches(base_url: str, host: str) -> bool:
 def normalize_proxy_env_vars() -> None:
     """No-op: httpx/the Anthropic SDK already honor HTTP(S)_PROXY env vars.
 
-    hermes normalizes mixed-case proxy variables here; nothing in this proxy's
-    OAuth path depends on that, so the shim does nothing.
+    Upstream normalizes mixed-case proxy variables here; nothing in this
+    proxy's OAuth path depends on that, so the shim does nothing.
     """
     return None

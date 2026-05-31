@@ -5,7 +5,8 @@ A small, **local, single-user** server that exposes an **OpenAI-compatible
 Code OAuth / subscription token**. Point any OpenAI client (aider, Continue,
 LibreChat, the `openai` SDK, plain `curl`) at it and talk to Claude.
 
-It vendors hermes-agent's `anthropic_adapter.py` for the OpenAI→Anthropic
+It includes a vendored Anthropic-Messages adapter (see
+`THIRD_PARTY_NOTICES.md` for attribution) for the OpenAI→Anthropic
 request translation and the OAuth client identity, and adds the
 Anthropic→OpenAI **response** translation (streaming and non-streaming).
 

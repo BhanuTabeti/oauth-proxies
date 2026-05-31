@@ -1,6 +1,6 @@
 """OAuth-subscription token resolution + Anthropic client construction.
 
-Thin wrapper over the vendored hermes adapter, specialised for the
+Thin wrapper over the vendored Anthropic-Messages adapter, specialised for the
 OAuth-subscription path (the only auth mode this proxy supports).
 
 CONTRACT (do not change these signatures — app.py and tests depend on them):

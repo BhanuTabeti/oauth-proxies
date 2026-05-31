@@ -2,10 +2,11 @@
 
 A small, **local, single-user** HTTP server that speaks the OpenAI
 `/v1/chat/completions` API and forwards to `api.anthropic.com` using **your own
-Claude Code OAuth / subscription token**. It vendors hermes-agent's
-`anthropic_adapter.py` for the OpenAI→Anthropic request translation + OAuth
-client identity, and adds the missing **Anthropic→OpenAI response translation**
-(streaming + non-streaming).
+Claude Code OAuth / subscription token**. It includes a vendored
+Anthropic-Messages adapter (see `THIRD_PARTY_NOTICES.md` for attribution) for
+the OpenAI→Anthropic request translation + OAuth client identity, and adds
+the missing **Anthropic→OpenAI response translation** (streaming +
+non-streaming).
 
 ## Scope & ToS boundary
 
@@ -31,14 +32,14 @@ oauth_proxy/
   models.py           # pydantic request schemas + model catalog
   config.py           # env-var config
   _vendor/
-    anthropic_adapter.py  # VERBATIM copy from hermes-agent
-    hermes_constants.py / utils.py / tools/schema_sanitizer.py / tools/lazy_deps.py  # shims
+    anthropic_adapter.py  # modified copy of an upstream adapter (see THIRD_PARTY_NOTICES.md)
+    _paths.py / utils.py / tools/schema_sanitizer.py / tools/lazy_deps.py  # shims
 tests/                # pytest; converters are pure (dict->dict), tested without network
 ```
 
-`_vendor/__init__.py` puts `_vendor/` on `sys.path` so the unedited adapter
-resolves its hermes-internal imports against the shims. Access it via
-`from oauth_proxy._vendor import adapter`.
+`_vendor/__init__.py` puts `_vendor/` on `sys.path` so the adapter resolves
+its sibling-module imports (`_paths`, `utils`, `tools.*`) against the shims.
+Access it via `from oauth_proxy._vendor import adapter`.
 
 ## Request flow
 
