@@ -95,7 +95,12 @@ def anthropic_events_to_openai_chunks(
     next_tool_index = 0
 
     # Usage accounting, harvested from message_start / message_delta.
-    prompt_tokens = 0
+    # Anthropic reports input tokens split three ways (uncached / cache_read /
+    # cache_creation); OpenAI's ``prompt_tokens`` is their sum, with the cached
+    # portion surfaced separately under ``prompt_tokens_details``.
+    input_tokens = 0
+    cache_read = 0
+    cache_creation = 0
     completion_tokens = 0
 
     # finish_reason, mapped from message_delta; defaults to "stop".
@@ -116,7 +121,13 @@ def anthropic_events_to_openai_chunks(
                 if isinstance(usage, dict):
                     val = usage.get("input_tokens")
                     if isinstance(val, int):
-                        prompt_tokens = val
+                        input_tokens = val
+                    val = usage.get("cache_read_input_tokens")
+                    if isinstance(val, int):
+                        cache_read = val
+                    val = usage.get("cache_creation_input_tokens")
+                    if isinstance(val, int):
+                        cache_creation = val
             continue
 
         # Any event that produces output must be preceded by the role chunk.
@@ -206,6 +217,14 @@ def anthropic_events_to_openai_chunks(
                 val = usage.get("output_tokens")
                 if isinstance(val, int):
                     completion_tokens = val
+                # Some models / paths report cache fields on the message_delta
+                # as well; capture them if present.
+                val = usage.get("cache_read_input_tokens")
+                if isinstance(val, int):
+                    cache_read = val
+                val = usage.get("cache_creation_input_tokens")
+                if isinstance(val, int):
+                    cache_creation = val
             continue
 
         if etype == "message_stop":
@@ -226,6 +245,7 @@ def anthropic_events_to_openai_chunks(
 
     # Optional trailing usage chunk (after the finish_reason chunk).
     if include_usage:
+        prompt_tokens = input_tokens + cache_read + cache_creation
         yield {
             "id": completion_id,
             "object": "chat.completion.chunk",
@@ -236,5 +256,6 @@ def anthropic_events_to_openai_chunks(
                 "prompt_tokens": prompt_tokens,
                 "completion_tokens": completion_tokens,
                 "total_tokens": prompt_tokens + completion_tokens,
+                "prompt_tokens_details": {"cached_tokens": cache_read},
             },
         }

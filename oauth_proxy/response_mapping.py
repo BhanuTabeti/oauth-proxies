@@ -110,8 +110,16 @@ def anthropic_message_to_openai(
     usage = message.get("usage")
     if not isinstance(usage, dict):
         usage = {}
-    prompt_tokens = usage.get("input_tokens", 0) or 0
-    completion_tokens = usage.get("output_tokens", 0) or 0
+    # Anthropic reports input tokens split three ways: ``input_tokens`` is the
+    # uncached remainder, ``cache_read_input_tokens`` was served from cache
+    # (~0.1× cost), ``cache_creation_input_tokens`` was processed AND written
+    # to cache (~1.25× cost). OpenAI's ``prompt_tokens`` is the total input,
+    # with the cached portion exposed under ``prompt_tokens_details``.
+    input_tokens = usage.get("input_tokens", 0) or 0
+    cache_read = usage.get("cache_read_input_tokens", 0) or 0
+    cache_creation = usage.get("cache_creation_input_tokens", 0) or 0
+    output_tokens = usage.get("output_tokens", 0) or 0
+    prompt_tokens = input_tokens + cache_read + cache_creation
 
     return {
         "id": completion_id,
@@ -127,8 +135,9 @@ def anthropic_message_to_openai(
         ],
         "usage": {
             "prompt_tokens": prompt_tokens,
-            "completion_tokens": completion_tokens,
-            "total_tokens": prompt_tokens + completion_tokens,
+            "completion_tokens": output_tokens,
+            "total_tokens": prompt_tokens + output_tokens,
+            "prompt_tokens_details": {"cached_tokens": cache_read},
         },
     }
 

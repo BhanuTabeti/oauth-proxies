@@ -23,14 +23,20 @@ def convert(events: List[Dict[str, Any]], **overrides: Any) -> List[Dict[str, An
 
 
 # ── Event builders ───────────────────────────────────────────────────────────
-def message_start(input_tokens: int = 12, output_tokens: int = 1) -> Dict[str, Any]:
+def message_start(
+    input_tokens: int = 12,
+    output_tokens: int = 1,
+    cache_read: int = 0,
+    cache_creation: int = 0,
+) -> Dict[str, Any]:
+    usage = {"input_tokens": input_tokens, "output_tokens": output_tokens}
+    if cache_read:
+        usage["cache_read_input_tokens"] = cache_read
+    if cache_creation:
+        usage["cache_creation_input_tokens"] = cache_creation
     return {
         "type": "message_start",
-        "message": {
-            "id": "msg_abc",
-            "role": "assistant",
-            "usage": {"input_tokens": input_tokens, "output_tokens": output_tokens},
-        },
+        "message": {"id": "msg_abc", "role": "assistant", "usage": usage},
     }
 
 
@@ -448,6 +454,30 @@ def test_usage_chunk_emitted_when_enabled():
         "prompt_tokens": 12,
         "completion_tokens": 34,
         "total_tokens": 46,
+        "prompt_tokens_details": {"cached_tokens": 0},
+    }
+
+
+def test_usage_chunk_includes_cached_tokens_when_present():
+    # message_start carries cache_read_input_tokens; the trailing usage chunk
+    # must reflect it as prompt_tokens_details.cached_tokens and the totals
+    # must include both cache_read and cache_creation as input.
+    events = [
+        message_start(input_tokens=12, output_tokens=1,
+                      cache_read=13334, cache_creation=701),
+        text_start(0),
+        text_delta("hi", 0),
+        block_stop(0),
+        message_delta("end_turn", output_tokens=34),
+        message_stop(),
+    ]
+    chunks = convert(events, include_usage=True)
+    usage_chunk = chunks[-1]
+    assert usage_chunk["usage"] == {
+        "prompt_tokens": 12 + 13334 + 701,
+        "completion_tokens": 34,
+        "total_tokens": 12 + 13334 + 701 + 34,
+        "prompt_tokens_details": {"cached_tokens": 13334},
     }
 
 

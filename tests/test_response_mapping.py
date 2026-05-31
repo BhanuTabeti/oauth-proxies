@@ -62,10 +62,13 @@ def test_plain_text_response():
     assert "tool_calls" not in msg
     assert "reasoning_content" not in msg
     assert out["choices"][0]["finish_reason"] == "stop"
+    # _msg's default usage includes cache_creation_input_tokens=5, so
+    # prompt_tokens = input(12) + cache_read(0) + cache_creation(5) = 17.
     assert out["usage"] == {
-        "prompt_tokens": 12,
+        "prompt_tokens": 17,
         "completion_tokens": 34,
-        "total_tokens": 46,
+        "total_tokens": 51,
+        "prompt_tokens_details": {"cached_tokens": 0},
     }
 
 
@@ -382,6 +385,7 @@ def test_usage_mapping():
         "prompt_tokens": 100,
         "completion_tokens": 250,
         "total_tokens": 350,
+        "prompt_tokens_details": {"cached_tokens": 0},
     }
 
 
@@ -393,6 +397,7 @@ def test_usage_missing_defaults_to_zeros():
         "prompt_tokens": 0,
         "completion_tokens": 0,
         "total_tokens": 0,
+        "prompt_tokens_details": {"cached_tokens": 0},
     }
 
 
@@ -405,6 +410,7 @@ def test_usage_none_defaults_to_zeros():
         "prompt_tokens": 0,
         "completion_tokens": 0,
         "total_tokens": 0,
+        "prompt_tokens_details": {"cached_tokens": 0},
     }
 
 
@@ -417,7 +423,56 @@ def test_usage_partial_keys_default_to_zero():
         "prompt_tokens": 7,
         "completion_tokens": 0,
         "total_tokens": 7,
+        "prompt_tokens_details": {"cached_tokens": 0},
     }
+
+
+# ── cache-token surfacing (Anthropic reports input/cache_read/cache_creation
+#    separately; OpenAI's prompt_tokens = total input, with cached carved out
+#    under prompt_tokens_details.cached_tokens) ────────────────────────────
+def test_cache_read_surfaced_in_prompt_tokens_details():
+    out = anthropic_message_to_openai(
+        _msg(
+            content=[{"type": "text", "text": "x"}],
+            usage={"input_tokens": 50, "output_tokens": 10,
+                   "cache_read_input_tokens": 200},
+        ),
+        **KW,
+    )
+    assert out["usage"]["prompt_tokens"] == 250  # 50 fresh + 200 cached
+    assert out["usage"]["prompt_tokens_details"] == {"cached_tokens": 200}
+    assert out["usage"]["total_tokens"] == 260
+
+
+def test_cache_creation_included_in_prompt_tokens_but_not_cached_count():
+    # cache_creation tokens were processed (and written to cache), so they
+    # count toward prompt_tokens — but they're NOT cached reads.
+    out = anthropic_message_to_openai(
+        _msg(
+            content=[{"type": "text", "text": "x"}],
+            usage={"input_tokens": 50, "output_tokens": 10,
+                   "cache_creation_input_tokens": 500},
+        ),
+        **KW,
+    )
+    assert out["usage"]["prompt_tokens"] == 550  # 50 + 500 written
+    assert out["usage"]["prompt_tokens_details"] == {"cached_tokens": 0}
+
+
+def test_full_cache_breakdown_input_plus_read_plus_creation():
+    out = anthropic_message_to_openai(
+        _msg(
+            content=[{"type": "text", "text": "x"}],
+            usage={"input_tokens": 12, "output_tokens": 34,
+                   "cache_read_input_tokens": 13334,
+                   "cache_creation_input_tokens": 701},
+        ),
+        **KW,
+    )
+    assert out["usage"]["prompt_tokens"] == 12 + 13334 + 701
+    assert out["usage"]["prompt_tokens_details"] == {"cached_tokens": 13334}
+    assert out["usage"]["completion_tokens"] == 34
+    assert out["usage"]["total_tokens"] == 12 + 13334 + 701 + 34
 
 
 # ── content edge cases ───────────────────────────────────────────────────────

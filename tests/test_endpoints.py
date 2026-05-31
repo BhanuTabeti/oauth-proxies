@@ -108,7 +108,10 @@ def test_chat_completion_non_stream():
     assert body["object"] == "chat.completion"
     assert body["choices"][0]["message"]["content"] == "Hello!"
     assert body["choices"][0]["finish_reason"] == "stop"
-    assert body["usage"] == {"prompt_tokens": 5, "completion_tokens": 2, "total_tokens": 7}
+    assert body["usage"] == {
+        "prompt_tokens": 5, "completion_tokens": 2, "total_tokens": 7,
+        "prompt_tokens_details": {"cached_tokens": 0},
+    }
     # The proxy forwarded an OAuth-mode request upstream.
     assert fake.messages.last_kwargs["model"] == "claude-opus-4-7"
 
