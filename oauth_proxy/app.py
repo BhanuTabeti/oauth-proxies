@@ -241,8 +241,36 @@ def _classify_upstream_error(exc: Exception):
     return 502, "api_error", "upstream_error"
 
 
+def _login_cli(args: list) -> None:
+    """``oauth-proxy login {codex|grok}`` — run a provider's OAuth login."""
+    provider = (args[0] if args else "").lower()
+    load_dotenv()
+    configure_logging("INFO")
+    if provider == "codex":
+        from oauth_proxy import codex_auth as prov
+    elif provider == "grok":
+        from oauth_proxy import grok_auth as prov
+    else:
+        print("usage: oauth-proxy login {codex|grok}")
+        raise SystemExit(2)
+    try:
+        record = prov.login()
+    except prov.TokenError as exc:
+        print(f"Login failed: {exc}")
+        raise SystemExit(1)
+    acc = record.get("account_id") or "(none)"
+    print(f"✓ {provider} login stored (account_id={acc}). You can now make requests.")
+
+
 def main() -> None:
-    """Console entry point: ``oauth-proxy``."""
+    """Console entry point: ``oauth-proxy`` (server) / ``oauth-proxy login ...``."""
+    import sys
+
+    argv = sys.argv[1:]
+    if argv and argv[0] == "login":
+        _login_cli(argv[1:])
+        return
+
     import uvicorn
 
     load_dotenv()  # load .env from the working directory, if present
