@@ -71,6 +71,10 @@ KNOWN_MODELS: List[str] = [
 # fetches the real allowlist live from the backend per logged-in account. The
 # accepted set is account/client-specific and drifts over time.
 CODEX_MODELS: List[str] = [
+    "gpt-5.5",
+    "gpt-5.4",
+    "gpt-5.4-mini",
+    "gpt-5.3-codex",
     "gpt-5.2",
 ]
 

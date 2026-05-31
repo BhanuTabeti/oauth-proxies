@@ -65,9 +65,13 @@ ORIGINATOR = "codex_cli_rs"
 RESPONSES_BASE_URL = "https://chatgpt.com/backend-api/codex"
 RESPONSES_ENDPOINT = f"{RESPONSES_BASE_URL}/responses"
 # Live model allowlist for the logged-in ChatGPT account (requires a
-# ``client_version`` query param). Verified live: returns the accepted slugs.
+# ``client_version`` query param). NOTE: this listing is VERSION-GATED — an old
+# client_version under-reports (e.g. 0.20.0 returns only gpt-5.2), while a high
+# one returns the full current set (gpt-5.5/5.4/5.4-mini/5.3-codex/5.2). The
+# inference endpoint accepts all of them regardless, so we send a high version
+# to surface everything the account can actually use.
 MODELS_ENDPOINT = f"{RESPONSES_BASE_URL}/models"
-CLIENT_VERSION = "0.20.0"
+CLIENT_VERSION = "1.0.0"
 
 # id_token JWT claim namespace -> chatgpt_account_id (codex-rs/login/token_data.rs)
 _AUTH_CLAIM = "https://api.openai.com/auth"

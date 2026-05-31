@@ -142,4 +142,9 @@ def list_models(
     if resp.status_code >= 400:
         raise CodexHTTPError(resp.status_code, resp.text[:300] or f"HTTP {resp.status_code}")
     data = resp.json()
-    return [m["slug"] for m in data.get("models", []) if isinstance(m, dict) and m.get("slug")]
+    # Skip models the backend marks hidden (e.g. internal "codex-auto-review").
+    return [
+        m["slug"]
+        for m in data.get("models", [])
+        if isinstance(m, dict) and m.get("slug") and m.get("visibility") != "hide"
+    ]

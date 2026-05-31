@@ -141,6 +141,22 @@ def test_models_catalog_lists_live_codex_models_when_logged_in(monkeypatch):
     assert "grok-4.3" not in ids
 
 
+def test_list_models_filters_hidden_models(monkeypatch):
+    class _Resp:
+        status_code = 200
+
+        def json(self):
+            return {"models": [
+                {"slug": "gpt-5.5", "visibility": "list"},
+                {"slug": "codex-auto-review", "visibility": "hide"},
+                {"slug": "gpt-5.2"},  # no visibility -> kept
+                {"display_name": "no slug"},
+            ]}
+
+    monkeypatch.setattr(codex_client.httpx, "get", lambda *a, **k: _Resp())
+    assert codex_client.list_models({"Authorization": "Bearer t"}) == ["gpt-5.5", "gpt-5.2"]
+
+
 def test_models_catalog_omits_codex_when_not_logged_in(monkeypatch):
     client = _make_client(monkeypatch, _text_events(), tokens=_FakeCodexTokens(logged_in=False))
     ids = {m["id"] for m in client.get("/v1/models").json()["data"]}
