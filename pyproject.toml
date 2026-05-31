@@ -5,8 +5,24 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "oauth-proxy"
 version = "0.1.0"
-description = "Local OpenAI-compatible API server that forwards to Claude using a Claude Code OAuth subscription token."
+description = "Local OpenAI-compatible API server that forwards to Claude using your Claude subscription's Agent SDK credit."
+readme = "README.md"
 requires-python = ">=3.10"
+license = {file = "LICENSE"}
+authors = [{name = "Bhanu Tabeti", email = "bhanu.tabeti@gmail.com"}]
+keywords = ["claude", "anthropic", "openai-compatible", "proxy", "oauth", "agent-sdk"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Web Environment",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries",
+]
 dependencies = [
     "fastapi>=0.110",
     "uvicorn>=0.27",
@@ -14,6 +30,11 @@ dependencies = [
     "httpx>=0.27",
     "pydantic>=2",
 ]
+
+[project.urls]
+Homepage = "https://github.com/BhanuTabeti/oauth-proxies"
+Repository = "https://github.com/BhanuTabeti/oauth-proxies"
+Issues = "https://github.com/BhanuTabeti/oauth-proxies/issues"
 
 [project.optional-dependencies]
 dev = ["pytest>=8", "pytest-asyncio>=0.23"]

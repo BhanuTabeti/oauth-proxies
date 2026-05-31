@@ -9,15 +9,23 @@ It vendors hermes-agent's `anthropic_adapter.py` for the OpenAI→Anthropic
 request translation and the OAuth client identity, and adds the
 Anthropic→OpenAI **response** translation (streaming and non-streaming).
 
-## ⚠️ Scope & terms of service
+## Scope
 
-This reuses **your own** subscription token on **your own** machine — the
-narrowly-sanctioned case. It is **not** meant to fan a subscription out to many
-apps/users or run on a server; the OAuth path impersonates the Claude Code
-client (user-agent + beta headers + tool-name prefixing) and Anthropic actively
-distinguishes this traffic (it bills against the subscription/overage lane).
-Use accordingly. For an always-on or multi-user setup, use an `ANTHROPIC_API_KEY`
-and an off-the-shelf gateway instead.
+A **local, single-user** proxy for indie developers who want to use their
+**Claude subscription's Agent SDK credit** with OpenAI-compatible tools
+(aider, Continue, LibreChat, the `openai` SDK, plain `curl`) — without
+routing through Claude Code itself.
+
+Anthropic provides a monthly **Agent SDK credit** on Pro, Max, Team, and
+Enterprise plans starting June 15, 2026 that explicitly covers *"Claude
+Agent SDK usage in your own projects"* and *"third-party apps built on the
+Agent SDK"* — see [Use the Claude Agent SDK with your Claude plan][docs].
+This proxy is one way to tap that credit from any OpenAI-compatible client,
+locally. When the monthly credit is exhausted, additional usage flows to
+your plan's usage credits at standard API rates (if you've enabled them);
+otherwise requests pause until the next billing cycle.
+
+[docs]: https://support.claude.com/en/articles/15036540-use-the-claude-agent-sdk-with-your-claude-plan
 
 ## Install
 
